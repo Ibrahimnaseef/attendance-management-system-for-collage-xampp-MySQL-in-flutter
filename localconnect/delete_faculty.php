@@ -21,19 +21,18 @@ if (empty($facultyName)) {
 $conn->begin_transaction();
 
 try {
-    // Delete faculty from users table (assuming faculty username is stored in users table)
-    $query1 = "DELETE FROM users WHERE username = ?";
-    $stmt1 = $conn->prepare($query1);
-    $stmt1->bind_param("s", $facultyName);
-    $stmt1->execute();
-    $stmt1->close();
-
-    // Delete faculty from faculty table
-    $query2 = "DELETE FROM faculty WHERE name = ?";
-    $stmt2 = $conn->prepare($query2);
-    $stmt2->bind_param("s", $facultyName);
-    $stmt2->execute();
-    $stmt2->close();
+    // Delete from both users and faculty using JOIN
+    $query = "
+        DELETE u, f 
+        FROM users u 
+        LEFT JOIN faculty f ON u.id = f.user_id 
+        WHERE f.name = ?
+    ";
+    
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $facultyName);
+    $stmt->execute();
+    $stmt->close();
 
     // Commit transaction
     $conn->commit();

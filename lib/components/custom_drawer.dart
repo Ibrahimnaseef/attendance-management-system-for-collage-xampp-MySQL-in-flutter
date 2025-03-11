@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:attendance/pages/admin/admin_home.dart';
 import 'package:attendance/pages/login_page.dart';
+import 'package:attendance/pages/admin/add_faculty.dart';
+import 'package:attendance/pages/admin/promote_students.dart'; // Import the new screen
+import 'package:attendance/pages/admin/add_student.dart';
 
 class CustomDrawer extends StatelessWidget {
   final String adminName; // Accept admin name as a parameter
@@ -32,12 +35,66 @@ class CustomDrawer extends StatelessWidget {
             title: Text("Home"),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacement(
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AdminHomePage(adminName: adminName),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.add),
+            title: Text("ADD FACULTY"),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddFaculty(adminName: adminName),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.add),
+            title: Text("ADD STUDENT"),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddStudent(adminName: adminName),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.upgrade),
+            title: Text("Promote Students"), // New menu item
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder:
-                      (context) =>
-                          AdminHomePage(adminName: adminName), // Pass adminName
+                      (context) => PromoteStudentsScreen(
+                        adminName: adminName,
+                      ), // Navigate to the new screen
+                ),
+              );
+            },
+          ),
+
+          ListTile(
+            leading: Icon(Icons.add),
+            title: Text("CREATE CLASS"),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddStudent(adminName: adminName),
                 ),
               );
             },

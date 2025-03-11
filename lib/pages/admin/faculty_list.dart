@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:attendance/components/custom_drawer.dart';
+// import 'package:attendance/pages/admin/add_faculty.dart'; // Ensure this file exists
 
+//import 'package:attendance/pages/admin/student_list.dart'; // Ensure this file exists
 class FacultyPage extends StatefulWidget {
   final String adminName;
   final String department;
@@ -36,7 +38,6 @@ class _FacultyPageState extends State<FacultyPage> {
         final data = json.decode(response.body);
 
         if (data.containsKey('faculty')) {
-          // ✅ Check for 'faculty' key
           setState(() {
             facultyList = List<String>.from(data['faculty']);
             filteredList = facultyList;
@@ -100,10 +101,20 @@ class _FacultyPageState extends State<FacultyPage> {
     return Scaffold(
       backgroundColor: Colors.green.shade50,
       appBar: AppBar(
-        title: Text(
-          "Total Staffs: ${facultyList.length}",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Department: ${widget.department}",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              "Total Staffs: ${facultyList.length}",
+              style: TextStyle(fontSize: 14),
+            ),
+          ],
         ),
+
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: Builder(
@@ -137,6 +148,18 @@ class _FacultyPageState extends State<FacultyPage> {
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide.none,
                         ),
+                        suffixIcon:
+                            searchController.text.isNotEmpty
+                                ? IconButton(
+                                  icon: Icon(Icons.clear),
+                                  onPressed: () {
+                                    setState(() {
+                                      searchController.clear();
+                                      filterSearch(""); // Reset search
+                                    });
+                                  },
+                                )
+                                : null,
                       ),
                     ),
                   ),
@@ -202,10 +225,23 @@ class _FacultyPageState extends State<FacultyPage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildActionButton(Icons.upload, "Upload"),
-                        _buildActionButton(Icons.download, "Download"),
-                        _buildActionButton(Icons.add, "Add"),
-                        //_buildActionButton(Icons.delete, "Delete"),
+                        // _buildActionButton(Icons.upload, "Upload", () {
+                        //   print("Upload Clicked");
+                        // }),
+                        _buildActionButton(Icons.download, "Download", () {
+                          print("Download Clicked");
+                        }),
+                        // _buildActionButton(Icons.add, "Add", () {
+                        //   Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //       builder:
+                        //           (context) =>
+                        //               AddFaculty(adminName: widget.adminName),
+                        //     ),
+                        //   );
+                        // }
+                        // ),
                       ],
                     ),
                   ),
@@ -214,16 +250,15 @@ class _FacultyPageState extends State<FacultyPage> {
     );
   }
 
-  Widget _buildActionButton(IconData icon, String tooltip) {
+  Widget _buildActionButton(
+    IconData icon,
+    String tooltip,
+    VoidCallback onPressed,
+  ) {
     return IconButton(
-      onPressed: () {},
-      icon: Icon(icon, color: Colors.black12, size: 28),
+      onPressed: onPressed,
+      icon: Icon(icon, color: Colors.black, size: 28),
       tooltip: tooltip,
-      style: IconButton.styleFrom(
-        backgroundColor: Colors.white,
-        padding: EdgeInsets.all(12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
     );
   }
 }
