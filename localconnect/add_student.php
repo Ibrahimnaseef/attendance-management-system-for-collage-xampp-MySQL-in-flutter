@@ -15,6 +15,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $department_id = trim($_POST['department_id']);
     $semester = trim($_POST['semester']);
 
+    // Mapping semester to semester_st
+    $semester_map = [
+        'S1' => 1,
+        'S2' => 2,
+        'S3' => 3,
+        'S4' => 4,
+        'S5' => 5,
+        'S6' => 6,
+        'S7' => 7,
+        'S8' => 8
+    ];
+
+    // Get semester_st value
+    $semester_st = isset($semester_map[$semester]) ? $semester_map[$semester] : null;
+
+    if ($semester_st === null) {
+        echo json_encode(["success" => false, "message" => "Invalid semester value"]);
+        exit;
+    }
+
     mysqli_begin_transaction($conn);
 
     try {
@@ -25,9 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $user_id = mysqli_insert_id($conn);
 
-        $studentQuery = "INSERT INTO students (user_id, name, department_id, email, semester) VALUES (?, ?, ?, ?, ?)";
+        $studentQuery = "INSERT INTO students (user_id, name, department_id, email, semester, semester_st) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt2 = mysqli_prepare($conn, $studentQuery);
-        mysqli_stmt_bind_param($stmt2, "issss", $user_id, $name, $department_id, $email, $semester);
+        mysqli_stmt_bind_param($stmt2, "issssi", $user_id, $name, $department_id, $email, $semester, $semester_st);
         mysqli_stmt_execute($stmt2);
 
         mysqli_commit($conn);

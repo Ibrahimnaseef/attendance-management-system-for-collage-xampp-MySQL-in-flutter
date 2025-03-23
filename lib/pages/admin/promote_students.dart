@@ -17,6 +17,8 @@ class _PromoteStudentsScreenState extends State<PromoteStudentsScreen> {
   bool isLoading = false;
 
   Future<void> updateSemesters(String action) async {
+    if (!mounted) return;
+
     setState(() {
       isLoading = true;
     });
@@ -24,13 +26,14 @@ class _PromoteStudentsScreenState extends State<PromoteStudentsScreen> {
     final url = Uri.parse("http://10.0.2.2/localconnect/update_semesters.php");
 
     try {
-      final response = await http.post(
-        url,
-        body: {'action': action}, // Send action type to PHP
-      );
+      final response = await http.post(url, body: {'action': action});
+
+      print("Raw Response: ${response.body}"); // Debugging step
 
       if (response.statusCode == 200 && response.body.isNotEmpty) {
-        final data = json.decode(response.body);
+        final Map<String, dynamic> data = json.decode(response.body);
+
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(data['message']),
@@ -41,13 +44,16 @@ class _PromoteStudentsScreenState extends State<PromoteStudentsScreen> {
         throw Exception("Invalid response from server");
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 

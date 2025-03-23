@@ -159,9 +159,9 @@ class _UploadStudentsState extends State<UploadStudents> {
                         ),
                         TableRow(
                           children: [
-                            tableCell("John Doe"),
+                            tableCell("IJAS IKKA"),
                             tableCell("UCE123"),
-                            tableCell("john@example.com"),
+                            tableCell("IJASIKKA@example.com"),
                             tableCell("password123"),
                             tableCell("CSE"),
                             tableCell("S3"),
