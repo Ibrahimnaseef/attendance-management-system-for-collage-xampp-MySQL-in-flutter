@@ -15,6 +15,12 @@ class AddFaculty extends StatefulWidget {
 
 class _AddFacultyState extends State<AddFaculty> {
   final _formKey = GlobalKey<FormState>();
+  final _emailRegex = RegExp(
+    r'^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$',
+  );
+  final _passwordRegex = RegExp(
+    r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$',
+  );
 
   TextEditingController nameController = TextEditingController();
   TextEditingController usernameController = TextEditingController();
@@ -23,6 +29,7 @@ class _AddFacultyState extends State<AddFaculty> {
 
   String? selectedDepId;
   List<Map<String, String>> departments = [];
+  bool _isPasswordVisible = false;
 
   @override
   void initState() {
@@ -59,9 +66,9 @@ class _AddFacultyState extends State<AddFaculty> {
   Future<void> addFaculty() async {
     if (!_formKey.currentState!.validate()) return;
     if (selectedDepId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Please select a department")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select a department")),
+      );
       return;
     }
     String apiUrl = "http://10.0.2.2/localconnect/add_faculty.php";
@@ -79,9 +86,9 @@ class _AddFacultyState extends State<AddFaculty> {
     try {
       var data = jsonDecode(response.body);
       if (data['success']) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Faculty Added Successfully")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Faculty Added Successfully")),
+        );
         nameController.clear();
         usernameController.clear();
         emailController.clear();
@@ -94,7 +101,7 @@ class _AddFacultyState extends State<AddFaculty> {
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error parsing response")));
+      ).showSnackBar(const SnackBar(content: Text("Error parsing response")));
     }
   }
 
@@ -103,16 +110,15 @@ class _AddFacultyState extends State<AddFaculty> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Add Faculty",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.green[200],
-        //actions: [IconButton(icon: Icon(Icons.logout), onPressed: () {})],
       ),
       drawer: CustomDrawer(adminName: widget.adminName),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -122,20 +128,20 @@ class _AddFacultyState extends State<AddFaculty> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           "Select Department",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
                           value: selectedDepId,
                           onChanged: (value) {
@@ -156,10 +162,10 @@ class _AddFacultyState extends State<AddFaculty> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: nameController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: "Name",
                             border: OutlineInputBorder(),
                           ),
@@ -167,10 +173,10 @@ class _AddFacultyState extends State<AddFaculty> {
                               (value) =>
                                   value!.isEmpty ? "Enter faculty name" : null,
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: usernameController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: "Username",
                             border: OutlineInputBorder(),
                           ),
@@ -178,45 +184,70 @@ class _AddFacultyState extends State<AddFaculty> {
                               (value) =>
                                   value!.isEmpty ? "Enter username" : null,
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: emailController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: "Email",
                             border: OutlineInputBorder(),
                           ),
                           keyboardType: TextInputType.emailAddress,
-                          validator:
-                              (value) =>
-                                  value!.isEmpty ? "Enter faculty email" : null,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter an email address';
+                            }
+                            if (!_emailRegex.hasMatch(value)) {
+                              return 'Please enter a valid email address';
+                            }
+                            return null;
+                          },
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: passwordController,
                           decoration: InputDecoration(
                             labelText: "Password",
-                            border: OutlineInputBorder(),
+                            border: const OutlineInputBorder(),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible;
+                                });
+                              },
+                            ),
                           ),
-                          obscureText: true,
-                          validator:
-                              (value) =>
-                                  value!.isEmpty
-                                      ? "Enter a strong password"
-                                      : null,
+                          obscureText: !_isPasswordVisible,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a password';
+                            }
+                            if (value.length < 8) {
+                              return 'Password must be at least 8 characters';
+                            }
+                            if (!_passwordRegex.hasMatch(value)) {
+                              return 'Password must include:\n- Uppercase letter\n- Lowercase letter\n- Number\n- Special character';
+                            }
+                            return null;
+                          },
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: addFaculty,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.black,
-                              padding: EdgeInsets.symmetric(vertical: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child: Text(
+                            child: const Text(
                               "Add Faculty",
                               style: TextStyle(
                                 color: Colors.white,
@@ -231,7 +262,7 @@ class _AddFacultyState extends State<AddFaculty> {
                   ),
                 ),
               ),
-              SizedBox(height: 150),
+              const SizedBox(height: 150),
               GestureDetector(
                 onTap: () {
                   Navigator.pop(context);
@@ -239,9 +270,8 @@ class _AddFacultyState extends State<AddFaculty> {
                     context,
                     MaterialPageRoute(
                       builder:
-                          (context) => UploadFaculty(
-                            adminName: widget.adminName,
-                          ), // Navigate to the new screen
+                          (context) =>
+                              UploadFaculty(adminName: widget.adminName),
                     ),
                   );
                 },
@@ -252,7 +282,6 @@ class _AddFacultyState extends State<AddFaculty> {
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(8),
                   ),
-
                   child: const Center(
                     child: Text(
                       "Upload Excel",

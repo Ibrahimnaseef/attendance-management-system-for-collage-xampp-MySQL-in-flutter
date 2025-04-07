@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:attendance_app/components/custom_drawer.dart';
-//import 'package:attendance/pages/admin/add_student.dart';
 import 'package:attendance_app/pages/admin/upload_students.dart';
-//import 'package:attendance/pages/admin/admin_home.dart';
 
 class AddStudent extends StatefulWidget {
   final String adminName;
@@ -17,6 +15,12 @@ class AddStudent extends StatefulWidget {
 
 class _AddStudentState extends State<AddStudent> {
   final _formKey = GlobalKey<FormState>();
+  final _emailRegex = RegExp(
+    r'^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$',
+  );
+  final _passwordRegex = RegExp(
+    r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$',
+  );
 
   TextEditingController nameController = TextEditingController();
   TextEditingController usernameController = TextEditingController();
@@ -36,6 +40,8 @@ class _AddStudentState extends State<AddStudent> {
     "S7",
     "S8",
   ];
+
+  bool _isPasswordVisible = false;
 
   @override
   void initState() {
@@ -73,7 +79,9 @@ class _AddStudentState extends State<AddStudent> {
     if (!_formKey.currentState!.validate()) return;
     if (selectedDepId == null || selectedSemester == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please select both department and semester")),
+        const SnackBar(
+          content: Text("Please select both department and semester"),
+        ),
       );
       return;
     }
@@ -94,9 +102,9 @@ class _AddStudentState extends State<AddStudent> {
     try {
       var data = jsonDecode(response.body);
       if (data['success']) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Student Added Successfully")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Student Added Successfully")),
+        );
         nameController.clear();
         usernameController.clear();
         emailController.clear();
@@ -109,7 +117,7 @@ class _AddStudentState extends State<AddStudent> {
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error parsing response")));
+      ).showSnackBar(const SnackBar(content: Text("Error parsing response")));
     }
   }
 
@@ -118,7 +126,7 @@ class _AddStudentState extends State<AddStudent> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Add Student",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
@@ -126,7 +134,7 @@ class _AddStudentState extends State<AddStudent> {
       ),
       drawer: CustomDrawer(adminName: widget.adminName),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -136,20 +144,20 @@ class _AddStudentState extends State<AddStudent> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           "Select Department",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
                           value: selectedDepId,
                           onChanged: (value) {
@@ -170,15 +178,15 @@ class _AddStudentState extends State<AddStudent> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 16),
-                        Text(
+                        const SizedBox(height: 16),
+                        const Text(
                           "Select Semester",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
                           value: selectedSemester,
                           onChanged: (value) {
@@ -199,10 +207,10 @@ class _AddStudentState extends State<AddStudent> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: nameController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: "Name",
                             border: OutlineInputBorder(),
                           ),
@@ -210,10 +218,10 @@ class _AddStudentState extends State<AddStudent> {
                               (value) =>
                                   value!.isEmpty ? "Enter student name" : null,
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: usernameController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: "Username",
                             border: OutlineInputBorder(),
                           ),
@@ -221,45 +229,70 @@ class _AddStudentState extends State<AddStudent> {
                               (value) =>
                                   value!.isEmpty ? "Enter username" : null,
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: emailController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: "Email",
                             border: OutlineInputBorder(),
                           ),
                           keyboardType: TextInputType.emailAddress,
-                          validator:
-                              (value) =>
-                                  value!.isEmpty ? "Enter student email" : null,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter an email address';
+                            }
+                            if (!_emailRegex.hasMatch(value)) {
+                              return 'Please enter a valid email address';
+                            }
+                            return null;
+                          },
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: passwordController,
                           decoration: InputDecoration(
                             labelText: "Password",
-                            border: OutlineInputBorder(),
+                            border: const OutlineInputBorder(),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible;
+                                });
+                              },
+                            ),
                           ),
-                          obscureText: true,
-                          validator:
-                              (value) =>
-                                  value!.isEmpty
-                                      ? "Enter a strong password"
-                                      : null,
+                          obscureText: !_isPasswordVisible,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a password';
+                            }
+                            if (value.length < 8) {
+                              return 'Password must be at least 8 characters';
+                            }
+                            if (!_passwordRegex.hasMatch(value)) {
+                              return 'Password must include:\n- Uppercase letter\n- Lowercase letter\n- Number\n- Special character';
+                            }
+                            return null;
+                          },
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: addStudent,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.black,
-                              padding: EdgeInsets.symmetric(vertical: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child: Text(
+                            child: const Text(
                               "Add Student",
                               style: TextStyle(
                                 color: Colors.white,
@@ -274,7 +307,7 @@ class _AddStudentState extends State<AddStudent> {
                   ),
                 ),
               ),
-              SizedBox(height: 50),
+              const SizedBox(height: 50),
               GestureDetector(
                 onTap: () {
                   Navigator.pop(context);
@@ -282,9 +315,8 @@ class _AddStudentState extends State<AddStudent> {
                     context,
                     MaterialPageRoute(
                       builder:
-                          (context) => UploadStudents(
-                            adminName: widget.adminName,
-                          ), // Navigate to the new screen
+                          (context) =>
+                              UploadStudents(adminName: widget.adminName),
                     ),
                   );
                 },
@@ -295,7 +327,6 @@ class _AddStudentState extends State<AddStudent> {
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(8),
                   ),
-
                   child: const Center(
                     child: Text(
                       "Upload Excel",
