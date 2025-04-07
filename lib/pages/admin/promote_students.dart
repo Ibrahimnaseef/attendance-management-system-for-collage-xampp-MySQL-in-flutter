@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitThreeBounce;
-import 'package:attendance/components/custom_drawer.dart';
+import 'package:attendance_app/components/custom_drawer.dart';
 
 class PromoteStudentsScreen extends StatefulWidget {
   final String adminName;
 
-  PromoteStudentsScreen({required this.adminName});
+  const PromoteStudentsScreen({super.key, required this.adminName});
 
   @override
   _PromoteStudentsScreenState createState() => _PromoteStudentsScreenState();
@@ -17,8 +17,6 @@ class _PromoteStudentsScreenState extends State<PromoteStudentsScreen> {
   bool isLoading = false;
 
   Future<void> updateSemesters(String action) async {
-    if (!mounted) return;
-
     setState(() {
       isLoading = true;
     });
@@ -26,14 +24,13 @@ class _PromoteStudentsScreenState extends State<PromoteStudentsScreen> {
     final url = Uri.parse("http://10.0.2.2/localconnect/update_semesters.php");
 
     try {
-      final response = await http.post(url, body: {'action': action});
-
-      print("Raw Response: ${response.body}"); // Debugging step
+      final response = await http.post(
+        url,
+        body: {'action': action}, // Send action type to PHP
+      );
 
       if (response.statusCode == 200 && response.body.isNotEmpty) {
-        final Map<String, dynamic> data = json.decode(response.body);
-
-        if (!mounted) return;
+        final data = json.decode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(data['message']),
@@ -44,16 +41,13 @@ class _PromoteStudentsScreenState extends State<PromoteStudentsScreen> {
         throw Exception("Invalid response from server");
       }
     } catch (e) {
-      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );
     } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 

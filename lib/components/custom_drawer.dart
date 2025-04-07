@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:attendance/pages/admin/admin_home.dart';
-import 'package:attendance/pages/login_page.dart';
-import 'package:attendance/pages/admin/add_faculty.dart';
-import 'package:attendance/pages/admin/promote_students.dart'; // Import the new screen
-import 'package:attendance/pages/admin/add_student.dart';
-import 'package:attendance/pages/admin/create_class.dart';
+import 'package:attendance_app/pages/admin/admin_home.dart';
+import 'package:attendance_app/pages/login_page.dart';
+import 'package:attendance_app/pages/admin/add_faculty.dart';
+import 'package:attendance_app/pages/admin/promote_students.dart'; // Import the new screen
+import 'package:attendance_app/pages/admin/add_student.dart';
+import 'package:attendance_app/pages/admin/create_class.dart';
 
 class CustomDrawer extends StatelessWidget {
   final String adminName; // Accept admin name as a parameter
 
-  CustomDrawer({required this.adminName});
+  const CustomDrawer({super.key, required this.adminName});
 
   @override
   Widget build(BuildContext context) {
@@ -95,9 +95,7 @@ class CustomDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder:
-                      (context) =>
-                          AssignSubjectFacultyPage(adminName: adminName),
+                  builder: (context) => AssignSubjectFacultyPage(adminName: adminName),
                 ),
               );
             },

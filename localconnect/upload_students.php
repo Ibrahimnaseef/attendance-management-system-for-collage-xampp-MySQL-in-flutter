@@ -11,18 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    // Mapping semester to semester_st
-    $semester_map = [
-        'S1' => 1,
-        'S2' => 2,
-        'S3' => 3,
-        'S4' => 4,
-        'S5' => 5,
-        'S6' => 6,
-        'S7' => 7,
-        'S8' => 8
-    ];
-
     mysqli_begin_transaction($conn);
     try {
         foreach ($data['students'] as $student) {
@@ -33,13 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $department_id = trim($student['department_id']);
             $semester = trim($student['semester']);
 
-            // Convert semester to semester_st
-            $semester_st = isset($semester_map[$semester]) ? $semester_map[$semester] : null;
-
-            if ($semester_st === null) {
-                throw new Exception("Invalid semester value: $semester");
-            }
-
             // Check if department exists
             $checkDeptQuery = "SELECT depid FROM departments WHERE depid = ?";
             $stmtDept = mysqli_prepare($conn, $checkDeptQuery);
@@ -48,7 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             mysqli_stmt_store_result($stmtDept);
 
             if (mysqli_stmt_num_rows($stmtDept) == 0) {
-                throw new Exception("Invalid department ID: $department_id");
+                echo json_encode(["success" => false, "message" => "Invalid department ID"]);
+                exit;
             }
 
             // Insert into `users` table
@@ -60,10 +42,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (mysqli_stmt_affected_rows($stmtUser) > 0) {
                 $user_id = mysqli_insert_id($conn);
 
-                // Insert into `students` table with semester_st
-                $studentQuery = "INSERT INTO students (user_id, name, department_id, email, semester, semester_st) VALUES (?, ?, ?, ?, ?, ?)";
+                // Insert into `students` table
+                $studentQuery = "INSERT INTO students (user_id, name, department_id, email, semester) VALUES (?, ?, ?, ?, ?)";
                 $stmtStudent = mysqli_prepare($conn, $studentQuery);
-                mysqli_stmt_bind_param($stmtStudent, "issssi", $user_id, $name, $department_id, $email, $semester, $semester_st);
+                mysqli_stmt_bind_param($stmtStudent, "issss", $user_id, $name, $department_id, $email, $semester);
                 mysqli_stmt_execute($stmtStudent);
 
                 if (mysqli_stmt_affected_rows($stmtStudent) == 0) {

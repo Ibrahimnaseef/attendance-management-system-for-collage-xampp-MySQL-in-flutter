@@ -1,19 +1,17 @@
 import 'dart:convert';
-import 'package:attendance/pages/student_home.dart';
-import 'package:attendance/pages/admin/admin_home.dart';
-import 'package:attendance/pages/faculty_home.dart';
-//import 'package:attendance/pages/second_page.dart';
-//import 'package:attendance/components/square_title.dart';
-import 'package:attendance/components/my_button.dart';
-import 'package:attendance/components/my_textfield.dart';
+import 'package:attendance_app/pages/faculty/faculty_home.dart';
+import 'package:attendance_app/pages/student/student_home.dart';
+import 'package:attendance_app/pages/admin/admin_home.dart';
+import 'package:attendance_app/components/my_button.dart';
+import 'package:attendance_app/components/my_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
 
-  //text editing controller
   final TextEditingController username = TextEditingController();
   final TextEditingController password = TextEditingController();
 
@@ -21,125 +19,111 @@ class LoginPage extends StatelessWidget {
     if (username.text.trim().isEmpty || password.text.trim().isEmpty) {
       Fluttertoast.showToast(
         msg: "Please fill all fields",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.red,
         textColor: Colors.white,
-        fontSize: 16.0,
       );
       return;
     }
 
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2/localconnect/login.php'),
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: {'username': username.text, 'password': password.text},
-    );
-
-    print("Server Response: ${response.body}"); // Debugging output
-
     try {
-      var data = json.decode(response.body);
-      print("Decoded JSON: $data");
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2/localconnect/login.php'),
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: {'username': username.text, 'password': password.text},
+      );
 
-      if (data["status"] == "Success") {
-        String role = data["role"];
-        String adminName = data["admin_name"]; // Fetch admin name
+      if (response.statusCode == 200) {
+        try {
+          var data = json.decode(response.body);
+          print("Response: $data");
 
-        Fluttertoast.showToast(
-          msg: "Login successful",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
+          if (data["status"] == "Success") {
+            String role = data["role"];
 
-        if (role == "admin") {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AdminHomePage(adminName: adminName),
-            ),
-          );
-        } else if (role == "faculty") {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => FacultyPage()),
-          );
-        } else if (role == "student") {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => StudentPage()),
-          );
-        } else {
+            // Save user details in SharedPreferences
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            await prefs.setString('username', username.text);
+
+            Fluttertoast.showToast(
+              msg: "Login successful",
+              backgroundColor: Colors.green,
+              textColor: Colors.white,
+            );
+
+            if (role == "admin") {
+              await prefs.setString('admin_name', data["admin_name"]);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => AdminHomePage(adminName: data["admin_name"])),
+              );
+            } else if (role == "faculty") {
+              await prefs.setString('faculty_name', data["faculty_name"]);
+              await prefs.setString('faculty_id', data["faculty_id"]);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => FacultyDashboard()),
+              );
+            } else if (role == "student") {
+              await prefs.setString('student_id', data["student_id"]);
+              await prefs.setString('student_name',data["student_name"]);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => StudentDashboard()),
+              );
+            } else {
+              Fluttertoast.showToast(
+                msg: "Unknown role: $role",
+                backgroundColor: Colors.orange,
+              );
+            }
+          } else {
+            Fluttertoast.showToast(
+              msg: data["message"] ?? "Invalid username or password",
+              backgroundColor: Colors.red,
+            );
+          }
+        } catch (e) {
+          print("Error decoding JSON: $e");
           Fluttertoast.showToast(
-            msg: "Unknown role: $role",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            backgroundColor: Colors.orange,
-            textColor: Colors.white,
-            fontSize: 16.0,
+            msg: "Invalid server response",
+            backgroundColor: Colors.red,
           );
         }
       } else {
         Fluttertoast.showToast(
-          msg: "Invalid username or password",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
+          msg: "Server error: ${response.statusCode}",
           backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0,
         );
       }
     } catch (e) {
-      print("Error decoding response: $e");
+      print("Error: $e");
+      Fluttertoast.showToast(
+        msg: "Server error. Please try again.",
+        backgroundColor: Colors.red,
+      );
     }
   }
-
-  //singUserIn method
-  void singUserIn() {}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[350],
+      backgroundColor: Colors.blue[200],
       body: SafeArea(
         child: Center(
           child: Column(
             children: [
               const SizedBox(height: 50),
-              //lock image
               const Icon(Icons.lock, size: 90),
-
-              SizedBox(height: 50),
-
-              //welcome text
+              const SizedBox(height: 50),
               Text(
-                "welcome",
+                "Welcome",
                 style: TextStyle(color: Colors.grey[850], fontSize: 16),
               ),
-
-              SizedBox(height: 20),
-
-              //login form usrename
-              MyTextField(
-                controller: username,
-                hintText: "Username",
-                obscureText: false,
-              ),
-
-              SizedBox(height: 10),
-              //password
-              MyTextField(
-                controller: password,
-                hintText: "Password",
-                obscureText: true,
-              ),
-
-              //forgot password
-              SizedBox(height: 25),
-              //sign in button
+              const SizedBox(height: 20),
+              MyTextField(controller: username, hintText: "Username", obscureText: false),
+              const SizedBox(height: 10),
+              MyTextField(controller: password, hintText: "Password", obscureText: true),
+              const SizedBox(height: 25),
               ButtonTheme(
                 minWidth: 200,
                 height: 50,
@@ -149,8 +133,6 @@ class LoginPage extends StatelessWidget {
                   },
                 ),
               ),
-
-              //not a member register now
             ],
           ),
         ),

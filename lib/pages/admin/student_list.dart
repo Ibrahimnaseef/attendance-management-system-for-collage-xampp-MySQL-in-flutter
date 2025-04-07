@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:attendance/components/custom_drawer.dart';
+import 'package:attendance_app/components/custom_drawer.dart';
 
 class StudentPage extends StatefulWidget {
   final String adminName;
   final String department;
 
-  StudentPage({required this.adminName, required this.department});
+  const StudentPage({super.key, required this.adminName, required this.department});
 
   @override
   _StudentPageState createState() => _StudentPageState();

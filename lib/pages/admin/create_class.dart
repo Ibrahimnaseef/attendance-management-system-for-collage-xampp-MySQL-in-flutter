@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:attendance/components/custom_drawer.dart';
+import 'package:attendance_app/components/custom_drawer.dart';
+//import 'package:attendance/pages/admin/class_view.dart';
 
 class AssignSubjectFacultyPage extends StatefulWidget {
   final String adminName;
@@ -154,34 +155,34 @@ class _AssignSubjectFacultyPageState extends State<AssignSubjectFacultyPage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(
-              "Add New Subject",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            content: TextField(
-              controller: newSubjectController,
-              decoration: InputDecoration(labelText: "Enter Subject Name"),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text("Cancel", style: TextStyle(color: Colors.red)),
-              ),
-              ElevatedButton(
-                onPressed: addNewSubject,
-                child: Text("Add", style: TextStyle(color: Colors.black)),
-              ),
-            ],
+        title: Text(
+          "Add New Subject",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: TextField(
+          controller: newSubjectController,
+          decoration: InputDecoration(labelText: "Enter Subject Name"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text("Cancel", style: TextStyle(color: Colors.red)),
           ),
+          ElevatedButton(
+            onPressed: addNewSubject,
+            child: Text("Add", style: TextStyle(color: Colors.black)),
+          ),
+        ],
+      ),
     );
   }
 
   Future<void> selectDate(
-    BuildContext context,
-    TextEditingController controller,
-  ) async {
+      BuildContext context,
+      TextEditingController controller,
+      ) async {
     DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -205,11 +206,11 @@ class _AssignSubjectFacultyPageState extends State<AssignSubjectFacultyPage> {
         leading: Builder(
           builder:
               (context) => IconButton(
-                icon: Icon(Icons.menu, color: Colors.black),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-              ),
+            icon: Icon(Icons.menu, color: Colors.black),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
         ),
       ),
 
@@ -270,14 +271,14 @@ class _AssignSubjectFacultyPageState extends State<AssignSubjectFacultyPage> {
                 ),
                 value: selectedSemester,
                 items:
-                    semesters
-                        .map(
-                          (sem) => DropdownMenuItem(
-                            value: sem,
-                            child: Text("Semester $sem"),
-                          ),
-                        )
-                        .toList(),
+                semesters
+                    .map(
+                      (sem) => DropdownMenuItem(
+                    value: sem,
+                    child: Text("Semester $sem"),
+                  ),
+                )
+                    .toList(),
                 onChanged: (value) {
                   setState(() {
                     selectedSemester = value;
@@ -298,12 +299,12 @@ class _AssignSubjectFacultyPageState extends State<AssignSubjectFacultyPage> {
                         ),
                       ),
                       items:
-                          subjects.map((subject) {
-                            return DropdownMenuItem<int>(
-                              value: subject['id'],
-                              child: Text(subject['subject_name']),
-                            );
-                          }).toList(),
+                      subjects.map((subject) {
+                        return DropdownMenuItem<int>(
+                          value: subject['id'],
+                          child: Text(subject['subject_name']),
+                        );
+                      }).toList(),
                       onChanged:
                           (value) => setState(() => selectedSubject = value),
                     ),
@@ -325,14 +326,14 @@ class _AssignSubjectFacultyPageState extends State<AssignSubjectFacultyPage> {
                   ),
                 ),
                 items:
-                    faculty.map((prof) {
-                      return DropdownMenuItem<int>(
-                        value: int.tryParse(
-                          prof['id'].toString(),
-                        ), // ✅ Convert faculty ID to int safely
-                        child: Text(prof['name']),
-                      );
-                    }).toList(),
+                faculty.map((prof) {
+                  return DropdownMenuItem<int>(
+                    value: int.tryParse(
+                      prof['id'].toString(),
+                    ), // ✅ Convert faculty ID to int safely
+                    child: Text(prof['name']),
+                  );
+                }).toList(),
                 onChanged: (value) => setState(() => selectedFaculty = value),
               ),
               SizedBox(height: 16),
@@ -383,6 +384,7 @@ class _AssignSubjectFacultyPageState extends State<AssignSubjectFacultyPage> {
                   ),
                 ),
               ),
+
             ],
           ),
         ),
