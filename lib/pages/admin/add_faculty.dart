@@ -15,8 +15,10 @@ class AddFaculty extends StatefulWidget {
 
 class _AddFacultyState extends State<AddFaculty> {
   final _formKey = GlobalKey<FormState>();
-  final _emailRegex = RegExp(
-    r'^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$',
+  // Updated regex to specifically validate Gmail addresses
+  final _gmailRegex = RegExp(
+    r'^[a-zA-Z0-9](?:[a-zA-Z0-9.]{0,62}[a-zA-Z0-9])?@gmail\.com$',
+    caseSensitive: false,
   );
   final _passwordRegex = RegExp(
     r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$',
@@ -71,6 +73,15 @@ class _AddFacultyState extends State<AddFaculty> {
       );
       return;
     }
+
+    // Verify Gmail address before proceeding
+    if (!_gmailRegex.hasMatch(emailController.text.trim())) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a valid Gmail address")),
+      );
+      return;
+    }
+
     String apiUrl = "http://10.0.2.2/localconnect/add_faculty.php";
     var response = await http.post(
       Uri.parse(apiUrl),
@@ -188,7 +199,7 @@ class _AddFacultyState extends State<AddFaculty> {
                         TextFormField(
                           controller: emailController,
                           decoration: const InputDecoration(
-                            labelText: "Email",
+                            labelText: "Email (Gmail only)",
                             border: OutlineInputBorder(),
                           ),
                           keyboardType: TextInputType.emailAddress,
@@ -196,8 +207,8 @@ class _AddFacultyState extends State<AddFaculty> {
                             if (value == null || value.isEmpty) {
                               return 'Please enter an email address';
                             }
-                            if (!_emailRegex.hasMatch(value)) {
-                              return 'Please enter a valid email address';
+                            if (!_gmailRegex.hasMatch(value)) {
+                              return 'Please enter a valid Gmail address\n(example@gmail.com)';
                             }
                             return null;
                           },

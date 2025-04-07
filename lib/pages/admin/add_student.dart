@@ -15,8 +15,10 @@ class AddStudent extends StatefulWidget {
 
 class _AddStudentState extends State<AddStudent> {
   final _formKey = GlobalKey<FormState>();
-  final _emailRegex = RegExp(
-    r'^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$',
+  // Updated regex to specifically validate Gmail addresses
+  final _gmailRegex = RegExp(
+    r'^[a-zA-Z0-9](?:[a-zA-Z0-9.]{0,62}[a-zA-Z0-9])?@gmail\.com$',
+    caseSensitive: false,
   );
   final _passwordRegex = RegExp(
     r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$',
@@ -82,6 +84,14 @@ class _AddStudentState extends State<AddStudent> {
         const SnackBar(
           content: Text("Please select both department and semester"),
         ),
+      );
+      return;
+    }
+
+    // Verify Gmail address before proceeding
+    if (!_gmailRegex.hasMatch(emailController.text.trim())) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a valid Gmail address")),
       );
       return;
     }
@@ -233,7 +243,7 @@ class _AddStudentState extends State<AddStudent> {
                         TextFormField(
                           controller: emailController,
                           decoration: const InputDecoration(
-                            labelText: "Email",
+                            labelText: "Email (Gmail only)",
                             border: OutlineInputBorder(),
                           ),
                           keyboardType: TextInputType.emailAddress,
@@ -241,8 +251,8 @@ class _AddStudentState extends State<AddStudent> {
                             if (value == null || value.isEmpty) {
                               return 'Please enter an email address';
                             }
-                            if (!_emailRegex.hasMatch(value)) {
-                              return 'Please enter a valid email address';
+                            if (!_gmailRegex.hasMatch(value)) {
+                              return 'Please enter a valid Gmail address\n(example@gmail.com)';
                             }
                             return null;
                           },
