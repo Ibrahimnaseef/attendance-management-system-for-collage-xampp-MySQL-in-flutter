@@ -1,8 +1,10 @@
- it is an incomplet project that i'm doing in collage (cuttently login page only);
-step 1:-create a table for login in mysql xampp and;
-step 2:-localconnect file should be placed in xampp htdocs directory add the login.php file in hdocs(foe me in C:\xampp\htdocs\localconnect you can save where ever you want in htdocs);
-step 3:-Add the dart program in lib file in your flutter project;
-step 4:-add dependencies:
+here we use xampp for database
+step 1:-create a database name *localconnect* in mysql xampp and;
+step 2:-import the file *localconnect(1)* to the database;
+step 3:-create a new flutter project name:-*attendance_app*;
+step 4:
+
+-add dependencies:
   flutter:
     sdk: flutter
   http: ^1.3.0
