@@ -1,4 +1,4 @@
-here we use xampp for database
+here we use xampp for localhost-database
 step 1:-create a database name *localconnect* in mysql xampp and;
 step 2:-import the file *localconnect(1).sql* to the database;
 step 3:-create a new flutter project name:-*attendance_app*;
